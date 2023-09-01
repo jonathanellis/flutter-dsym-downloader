@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Flutter dSYM Downloader</title>
+    <script>
+        function downloadDsym() {
+            var flutterVersion = document.getElementById("flutterVersion").value;
+
+            // Step 1: Check if the user has provided the Flutter version
+            if (!flutterVersion) {
+                alert("Please provide the Flutter version.");
+                return;
+            }
+
+            // Step 2: Validate version
+            var versionPattern = /^[0-9]+\.[0-9]+\.[0-9]+$/;
+            if (!versionPattern.test(flutterVersion)) {
+                alert("Invalid version format. Please use x.y.z format (e.g., 1.2.3)");
+                return;
+            }
+
+            // Step 3: Download the file to get the Flutter engine version
+            var engineVersionUrl = "https://raw.githubusercontent.com/flutter/flutter/" + flutterVersion + "/bin/internal/engine.version";
+
+            fetch(engineVersionUrl)
+                .then(response => response.text())
+                .then(engineVersion => {
+                    if (engineVersion === "404: Not Found") {
+                        alert("Flutter version not found. Please check and try again.");
+                    } else {
+                        // Step 4: Generate the Flutter.dSYM.zip file download link
+                        var dsymUrl = "https://storage.cloud.google.com/flutter_infra_release/flutter/" + engineVersion + "/ios-release/Flutter.dSYM.zip";
+
+                        // Display the download link
+                        var downloadLink = document.createElement("a");
+                        downloadLink.href = dsymUrl;
+                        downloadLink.style.display = "none";
+                        downloadLink.download = "Flutter.dSYM.zip";
+                        document.body.appendChild(downloadLink);
+
+                        // Trigger the download
+                        downloadLink.click();
+                    }
+                })
+                .catch(error => {
+                    alert("An error occurred while fetching data: " + error.message);
+                });
+        }
+    </script>
+</head>
+
+<body>
+    <h1>Flutter dSYM Downloader</h1>
+    <p>Flutter version:</p>
+    <input type="text" id="flutterVersion" placeholder="e.g. 3.10.6">
+    <button onclick="downloadDsym()">Download dSYM</button>
+</body>
+
+</html>
